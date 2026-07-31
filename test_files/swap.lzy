@@ -1,0 +1,7 @@
+numbers = [1,2,3]
+
+fn a(arr) ~{
+    return arr+arr
+}
+
+print(a(numbers))

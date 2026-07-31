@@ -1,0 +1,14 @@
+numbers = [1, 2, 3, 4]
+print(numbers)
+print(numbers[0])
+print(numbers[-1])
+
+scores : int16[] = [100, 200, 300]
+print(scores)
+
+nonstrict ~ {
+    mixed : int[] = [1, 2, "three", 4]
+    print(mixed)
+}
+
+strict tags : string[] = ["lzy", "lang", 99]

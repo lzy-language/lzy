@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>LZY REPL</title>
+
+<style>
+
+:root{
+    --bg:#2C1B5C;
+    --panel:#785191;
+    --accent:#F5C3C4;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--accent);
+    font-family:Consolas, monospace;
+}
+
+header{
+    padding:20px;
+}
+
+pre.banner{
+    color:var(--accent);
+    font-size:14px;
+}
+
+.toolbar{
+    padding:10px 20px;
+}
+
+button{
+    background:var(--panel);
+    color:var(--accent);
+    border:none;
+    padding:10px 16px;
+    margin-right:8px;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+#editor{
+    width:calc(100% - 40px);
+    height:350px;
+    margin:20px;
+    background:#1E123D;
+    color:var(--accent);
+    border:none;
+    padding:12px;
+    resize:vertical;
+    font-family:Consolas, monospace;
+    font-size:15px;
+}
+
+#console{
+    margin:20px;
+    padding:12px;
+    min-height:200px;
+    background:#160D2E;
+    white-space:pre-wrap;
+    border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<pre class="banner">
+ __         ______     __  __
+/\ \       /\___  \   /\ \_\ \
+\ \ \____  \/_/  /__  \ \____ \
+ \ \_____\   /\_____\  \/\_____\
+  \/_____/   \/_____/   \/_____/
+
+lzy - laziest programming language ever
+created by gkugfk3 with ♡
+</pre>
+
+</header>
+
+<div class="toolbar">
+
+<button onclick="runCode()">Run</button>
+<button onclick="showVars()">Vars</button>
+<button onclick="clearConsole()">Clear</button>
+
+</div>
+
+<textarea id="editor"></textarea>
+
+<div id="console">LZY REPL ready.</div>
+
+<script>
+
+async function runCode(){
+
+    const code =
+        document.getElementById("editor").value;
+
+    const res =
+        await fetch("/run",{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({
+                code:code
+            })
+        });
+
+    const data = await res.json();
+
+    append(data.output);
+}
+
+async function showVars(){
+
+    const res =
+        await fetch("/vars");
+
+    const data =
+        await res.json();
+
+    append("\nVariables:\n");
+    append(data.output);
+}
+
+function clearConsole(){
+
+    document.getElementById("console").textContent = "";
+}
+
+function append(text){
+
+    const consoleBox =
+        document.getElementById("console");
+
+    consoleBox.textContent += text;
+
+    consoleBox.scrollTop =
+        consoleBox.scrollHeight;
+}
+
+document.getElementById("editor")
+.addEventListener("keydown", function(e){
+
+    if(e.ctrlKey && e.key === "Enter"){
+        runCode();
+    }
+});
+
+</script>
+
+</body>
+</html>

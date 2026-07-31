@@ -1,0 +1,22 @@
+!* test *!
+print("hello world")
+x = 64
+if x >= 32 ~ {
+    print(x+" is more than 32")
+}
+!/ loop with range (0 inclusive, 10 exclusive) !/
+loop 0..10 as i ~ {
+    print(i)
+}
+
+!/ do = while condition !/
+count = 0
+_start
+do count < 4839853 ~ {
+    count = count + 1
+}
+_end
+print("i counted up to "+count)
+
+print(x===x)
+print("[debug] -1: EOP")

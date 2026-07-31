@@ -1,0 +1,44 @@
+!/ comb sort demo !/
+!/ comb sort is like bubble sort but starts with a big gap and shrinks it !/
+
+fn combSort(arr) ~ {
+    gap = len(arr)
+    shrink = 1.3
+    sorted = false
+
+    do not sorted ~ {
+        gap = <int>(gap / shrink)
+        if gap <= 1 ~ {
+            gap = 1
+            sorted = true
+        }
+
+        i = 0
+        do i + gap < len(arr) ~ {
+            if arr[i] > arr[i + gap] ~ {
+                temp         = arr[i]
+                arr[i]       = arr[i + gap]
+                arr[i + gap] = temp
+                sorted = false
+            }
+            i = i + 1
+        }
+        print(arr)
+        _sleep(0.5)
+    }
+
+    return arr
+}
+
+!/ test data !/
+numbers = [64, 34, 25, 12, 22, 11, 90, 5]
+
+print("before:")
+print(numbers)
+
+
+result = combSort(numbers)
+
+
+print("after:")
+print(result)

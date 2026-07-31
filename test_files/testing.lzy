@@ -1,0 +1,10 @@
+count : float16 = 0 
+
+_start
+do count <= 5000 ~ {
+
+count = count + 0.1
+printl(count)
+
+} 
+_end

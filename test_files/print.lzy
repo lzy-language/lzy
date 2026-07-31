@@ -1,0 +1,7 @@
+x = 5
+print(<float64>x)     !/ 5     - cleaned !/
+printl(<float64>x)    !/ 5.0   - raw !/
+
+y = 5.5
+print(y)               !/ 5.5  - unaffected either way !/
+printl(y)              !/ 5.5 !/

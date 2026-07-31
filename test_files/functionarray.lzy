@@ -1,0 +1,9 @@
+fn a() ~{
+ print("a")
+}
+fn b() ~{
+ print("b")
+}
+
+functions = [a,b]
+functions[1]()

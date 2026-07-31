@@ -1,0 +1,41 @@
+print("\n100")
+count = 0
+_start
+do count < 100 ~ {
+    count = count + 1
+}
+_end
+print("i counted up to "+count)
+print("\n1000")
+count = 0
+_start
+do count < 1000 ~ {
+    count = count + 1
+}
+_end
+print("i counted up to "+count)
+print("\n10000")
+count = 0
+_start
+do count < 10000 ~ {
+    count = count + 1
+}
+_end
+print("i counted up to "+count)
+print("\n100000")
+count = 0
+_start
+do count < 100000 ~ {
+    count = count + 1
+}
+_end
+print("i counted up to "+count)
+print("\n1000000")
+count = 0
+_start
+do count < 1000000 ~ {
+    count = count + 1
+}
+_end
+print("i counted up to "+count)
+print("[debug] -1: EOP")

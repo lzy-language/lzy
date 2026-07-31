@@ -1,0 +1,761 @@
+!*
+    lzy language reference
+    version 0.2
+
+    sections:
+        1.  file structure and strictness
+        2.  comments
+        3.  semicolons
+        4.  types
+        5.  variables and casting
+        6.  arrays
+        7.  dictionaries
+        8.  structs
+        9.  control flow
+        10. loops
+        11. functions
+        12. lazywords
+        13. blocks and scope
+        14. the safe keyword
+        15. imports
+        16. error handling
+        17. string interpolation
+        18. nan and null
+        19. linter hints
+        20. watch (reactive variables)
+
+    todo / not yet decided:
+        - float128 memory layout (experimental, aliased to float64 for now)
+        - safe + no debugger edge cases (see section 14)
+        - bin + int math outside safe (not allowed, period)
+        - standard library beyond built-in lazywords
+*!
+
+
+!* ============================================================
+   1. file structure and strictness
+   ============================================================ *!
+
+!/ a .lzy file has no required header, just start writing !/
+
+!/ make everything in the file strict by default !/
+strict null
+
+!/ revert specific blocks back to lenient !/
+nonstrict ~ {
+    x = "i can be sloppy here"
+}
+
+!/ single line override !/
+strict int hp = 100
+nonstrict name = "player"
+
+!*
+    strict violation behaviour - full decision tree:
+
+        debugger attached
+            -> pause, drop into debugger
+
+        terminal present, no debugger
+            -> pause, print trace, wait for (c)ontinue or (a)bort
+
+        no terminal, no debugger
+            -> crash, write trace to lzy.log
+
+        fallback = true in .lzp (opt-in laziness, not recommended)
+            -> keep old value, warn to lzy.log, keep running
+            -> fallback is a workaround for people that dont feel like debugging
+            -> never use fallback in production
+*!
+
+!*
+    file extensions:
+        .lzy  -> source code
+        .lzp  -> project and config (written in lzy syntax)
+        .lz.* -> typed data files e.g. .lz.json .lz.csv .lz.xml
+                 runtime auto-parses these into lzy objects
+
+    example .lzp:
+
+    project ~ {
+        name = "myapp"
+        version = 0.1
+        entry = "main.lzy"
+    }
+
+    strictness ~ {
+        default = false
+        null = false
+        no_debugger = "crash"   !/ pause | crash | fallback !/
+        fallback = false        !/ ^^^^^ PAUSE SHOULD NOT BE USED OUTSIDE A DEBUGGER!!!!! !/
+        no_scopes = true      !/ strict mode overwrites it to be false !/
+    }
+
+    runtime ~ {
+        target = "interpreter"
+    }
+*!
+
+
+!* ============================================================
+   2. comments
+   ============================================================ *!
+
+!/ this is a single line comment !/
+
+!*
+    this is a
+    multiline comment
+*!
+
+!/ no # or // style comments !/
+
+
+!* ============================================================
+   3. semicolons
+   ============================================================ *!
+
+!/ semicolons are decorative and ignored by the interpreter !/
+!/ their only purpose is to split multiple statements on one line !/
+
+x = 1; y = 2; z = 3
+
+fn setup() ~ { x = 0; y = 0; active = true }
+
+!/ you dont need them at the end of lines, its purely style !/
+x = 1
+y = 2       !/ identical to x = 1; y = 2 !/
+
+
+!* ============================================================
+   4. types
+   ============================================================ *!
+
+!*
+    integers:
+        int2   -> 2 bit
+        int4   -> 4 bit
+        int8   -> 1 byte
+        int16  -> short
+        int32  -> default (just write "int")
+        int64  -> long
+
+    floats:
+        float4   -> quarter precision
+        float8   -> mini
+        float16  -> half precision
+        float32  -> single
+        float64  -> default (just write "float")
+        float128 -> experimental, two float64s joined, aliased to float64 for now
+
+    strings:
+        string      -> general purpose
+        longstring  -> large text, files, multiline content
+        tinystring  -> memory optimised, best for state machines and flags
+
+    booleans:
+        bin  -> binary boolean
+               true  (or t in lenient mode)
+               false (or f in lenient mode)
+
+    special values:
+        NaN  -> not a number, first class literal, float only
+        null -> absence of value, infectious (null + anything = null)
+
+    defaults when no size given:
+        int   -> int32
+        float -> float64
+
+    arrays: put [] after any type
+        int[]        -> int32 array
+        float64[]    -> explicit float64 array
+        tinystring[] -> tinystring array
+
+    dictionaries: put {} after any type
+        int{}    -> int32 dictionary
+        string{} -> string dictionary
+        {}       -> untyped dictionary
+
+    bin + int:
+        NOT allowed outside safe mode
+        safe bin active = true
+        active = active + 1   !/ fine in safe, active becomes int32(1) !/
+        bin dead = false
+        dead = dead + 1       !/ assert, bin cannot become int without safe !/
+*!
+
+
+!* ============================================================
+   5. variables and casting
+   ============================================================ *!
+
+!/ simple inference !/
+x = 5               !/ inferred int32 !/
+y = 3.14            !/ inferred float64 !/
+name = "lzy"        !/ inferred string !/
+alive = true        !/ inferred bin !/
+
+!/ type hint for primitives - single colon !/
+hp = 100            !/ inferred !/
+hp : int16 = 100    !/ hinted !/
+
+!/ type hint for structs and complex types - double colon !/
+pos :: Point = Point(0.0, 0.0)
+
+!/ strict on a single variable !/
+strict lives : int8 = 3
+
+!/ casting with angle brackets - used on expressions !/
+x = 5
+print(<float64>x)       !/ prints 5.0 !/
+print(<string>x)        !/ prints "5" !/
+print(<float64>hp + x)  !/ cast before math !/
+
+!/ the bin t/f hack !/
+!/ in strict mode t and f are not allowed unless you define them as bin variables !/
+bin t = true
+bin f = false
+active = t      !/ linter sees bin t exists, allows it !/
+
+!*
+    variable modifier combinations:
+        x = 5                   -> lenient, fixed type, warn on mismatch
+        strict int x = 5        -> strict, fixed type, debugger/crash on mismatch
+        safe int x = 5          -> lenient, free shapeshifting
+        safe strict int x = 5   -> strict, can change but only via explicit cast
+*!
+
+
+!* ============================================================
+   6. arrays
+   ============================================================ *!
+
+numbers = [1, 2, 3, 4]             !/ inferred int32[] !/
+names = ["alice", "bob", "carol"]  !/ inferred string[] !/
+scores : int16[] = [100, 200, 300]
+
+!/ warn and recover - lenient !/
+nonstrict ~ {
+    mixed : int[] = [1, 2, "three", 4]
+    !/ [warn] array mixed: element 3 expected int, got string
+       recovered by: removing element
+       result: [1, 2, 4] !/
+}
+
+!/ strict array - pauses or crashes on mismatch !/
+strict tags : string[] = ["lzy", "lang", 99]
+
+!*
+    fallback behaviour for arrays vs variables:
+        arrays   -> fallback removes the bad element, array is smaller but valid
+        variables -> fallback keeps old value, assignment is silently ignored
+                     this is dangerous, only arrays should use fallback
+                     variable mismatches should always pause or crash
+*!
+
+!/ warn message format !/
+!*
+    [warn] {context} {name}: {description}
+      -> at line N, col N
+      -> recovered by: {action}
+*!
+
+
+!* ============================================================
+   7. dictionaries
+   ============================================================ *!
+
+!/ lua style, no string quotes on keys !/
+player = int{
+    health = 100,
+    mana = 50,
+    stamina = 75,
+}
+
+config = {
+    name = "lzy",
+    version = 0.1,
+    active = true,
+}
+
+!/ string keys work but linter will nudge you !/
+data = int{
+    ["health"] = 100,   !/ linter: optimize - remove quotes from key "health" !/
+    health = 100,       !/ preferred !/
+}
+
+!/ nested !/
+world = {
+    player = { x = 0, y = 0 },
+    enemies = 5,
+}
+
+
+!* ============================================================
+   8. structs
+   ============================================================ *!
+
+struct Point ~ {
+    x :: float
+    y :: float
+}
+
+struct Coord ~ {
+    x :: int
+    y :: int
+}
+
+a = Point(1.0, 2.0)
+b = Coord(1, 2)
+
+!/ == structural equality - same shape, compatible types !/
+if a == b ~ {
+    print("structurally equal")
+}
+
+!/ === nominal equality - same name, exact types, no coercion !/
+if a === b ~ {
+    !/ will not trigger, Point != Coord !/
+}
+
+!*
+    == checks:
+        same field names
+        compatible types (int and float are compatible in lenient)
+
+    === checks:
+        same struct name
+        exact same types, no coercion
+*!
+
+
+!* ============================================================
+   9. control flow
+   ============================================================ *!
+
+if x > 5 ~ {
+    print("big")
+}
+
+if x > 10 ~ {
+    print("huge")
+} else if x > 5 ~ {
+    print("big")
+} else ~ {
+    print("small")
+}
+
+!/ one liner - no braces needed !/
+if x > 5 ~ print("big")
+
+!/ scope leaking - if blocks do NOT close scope !/
+if true ~ {
+    result = 42
+}
+print(result)   !/ prints 42 !/
+
+!/ scope leaking applies to all control flow blocks !/
+!/ it does NOT apply across function boundaries !/
+
+
+!* ============================================================
+   10. loops
+   ============================================================ *!
+
+!/ loop = for each !/
+loop fruits as fruit ~ {
+    print(fruit)
+}
+
+!/ loop with range (0 inclusive, 10 exclusive) !/
+loop 0..10 as i ~ {
+    print(i)
+}
+
+!/ do = while condition !/
+count = 0
+do count < 10 ~ {
+    count = count + 1
+}
+
+!/ forever = while true !/
+forever ~ {
+    input = ask("> ")
+    if input == "quit" ~ stop   !/ stop = break !/
+    if input == "" ~ skip       !/ skip = continue !/
+    print("you said: " + input)
+}
+
+!/ stop and skip work in all loop types !/
+
+
+!* ============================================================
+   11. functions
+   ============================================================ *!
+
+!/ basic !/
+fn greet(name) ~ {
+    print(`hello, ${name}!`)
+}
+
+!/ with type hints and return type !/
+fn multiply(a : int, b : int) : int ~ {
+    return a * b
+}
+
+!/ with struct type !/
+fn move(pos :: Point, dx : float, dy : float) :: Point ~ {
+    pos.x = pos.x + dx
+    pos.y = pos.y + dy
+    return pos
+}
+
+!/ functions create their own scope !/
+!/ variables inside do NOT leak out !/
+fn example() ~ {
+    inner = 99
+}
+example()
+!/ print(inner) -> warn or assert, inner does not exist here !/
+
+
+!* ============================================================
+   12. lazywords
+   ============================================================ *!
+
+!*
+    lazywords are inline-only convenience functions
+    they use | | instead of ( ) to stand out visually
+    defined with the lazy keyword
+    can be defined in .lzy files or project-wide in .lzp
+*!
+
+!/ defining !/
+lazy double|x : int| : int ~ { return x * 2 }
+lazy ping|| ~ { print("pong") }
+lazy lerp|a : float64, b : float64, t : float64| : float64 ~ {
+    return a + (b - a) * t
+}
+
+!/ calling !/
+print(double|5|)
+ping||
+result = lerp|0.0, 10.0, 0.5|
+
+!*
+    built-in lazywords:
+
+    math:
+        lerp|a, b, t|           -> linear interpolation
+        clamp|v, min, max|      -> clamp value
+        map|v, a, b, c, d|      -> remap range
+        abs|x|                  -> absolute value
+        round|x, decimals|      -> round to n places
+
+    arrays:
+        first|arr|              -> first element
+        last|arr|               -> last element
+        push|arr, value|        -> append
+        pop|arr|                -> remove and return last
+        flat|arr|               -> flatten nested arrays
+        filter|arr, fn|         -> filter by function
+        each|arr, fn|           -> run fn on each element
+
+    strings:
+        trim|str|               -> strip whitespace
+        split|str, sep|         -> split to array
+        join|arr, sep|          -> join to string
+        upper|str|              -> uppercase
+        lower|str|              -> lowercase
+
+    types:
+        type|x|                 -> returns type name as string
+        is|x, type|             -> type check, returns bin
+
+    project-wide lazywords go in .lzp:
+
+    lazy stateIs|s : tinystring, e : tinystring| : bin ~ {
+        return s == e
+    }
+*!
+
+
+!* ============================================================
+   13. blocks and scope
+   ============================================================ *!
+
+!/ ~ opens a block, {} wraps the body !/
+
+!/ multiline !/
+if true ~ {
+    x = 1
+    y = 2
+}
+
+!/ single expression !/
+if true ~ x = 1
+
+!/ deferred lazy block - only evaluates when accessed !/
+result = ~ {
+    100 + 200
+}
+print(result)   !/ evaluates here, prints 300 !/
+
+!/ anonymous trigger !/
+task = ~ { print("later") }
+task    !/ runs now !/
+
+!*
+    scope rules:
+        if, do, forever, loop  -> do NOT create new scopes, variables leak out
+        functions              -> DO create their own scope, nothing leaks out
+*!
+
+
+!* ============================================================
+   14. the safe keyword
+   ============================================================ *!
+
+!/ safe - variable can change type freely !/
+safe score = 0
+score = "not available"     !/ fine !/
+score = 3.14                !/ fine !/
+
+!/ safe strict - can change type but only with explicit cast !/
+safe strict level : int = 1
+level = <float64>level      !/ fine, explicit cast !/
+!/ level = 3.14             -> pause or crash, silent coercion not allowed !/
+
+!*
+    safe + no debugger behaviour:
+        still follows the main decision tree (see section 1)
+        the difference is safe was designed to ALLOW type changes
+        so a safe strict mismatch is a "you forgot the cast" mistake
+        rather than a hard violation
+        behaviour is still:
+            debugger     -> pause in debugger
+            terminal     -> pause, wait for input
+            no terminal  -> crash to log
+            fallback on  -> keep old value, warn to log
+        this is not yet fully decided and may change
+*!
+
+
+!* ============================================================
+   15. imports
+   ============================================================ *!
+
+!/ import whole module !/
+link "./thisModule.lzy"
+thisModule.thisFunction()
+
+!/ import whole module with rename !/
+link "./thisModule.lzy" as tm
+tm.thisFunction()
+
+!/ import specific item !/
+link SomeFunction of "./thatModule.lzy"
+SomeFunction()
+
+!/ import specific item with rename !/
+link SomeFunction of "./thatModule.lzy" as sf
+sf()
+
+!/ import everything with namespace !/
+link * of "./someModule.lzy" as someModule
+someModule.doSomething||
+
+!/ semicolons work here too !/
+link "./mod1.lzy" as m1; link "./mod2.lzy" as m2
+
+
+!* ============================================================
+   16. error handling
+   ============================================================ *!
+
+!*
+    pcall and xpcall from luau
+    pcall  -> protected call, catches errors, returns ok + result
+    xpcall -> same but with a custom error handler function
+*!
+
+!/ pcall - basic protected call !/
+ok, result = pcall(someFunction, arg1, arg2)
+
+if ok ~ {
+    print("succeeded: " + result)
+} else ~ {
+    print("failed: " + result)
+}
+
+!/ xpcall - with custom error handler !/
+fn myErrorHandler(err) ~ {
+    print("caught error: " + err)
+    return "handled"
+}
+
+ok, result = xpcall(someFunction, myErrorHandler, arg1, arg2)
+
+!/ pcall with a lazyword !/
+ok, result = pcall(double, 5)   !/ note: pass lazyword name without pipes !/
+
+
+!* ============================================================
+   17. string interpolation
+   ============================================================ *!
+
+!/ typescript style, backtick strings with ${} !/
+name = "world"
+print(`hello ${name}!`)                 !/ hello world! !/
+print(`1 + 1 = ${1 + 1}`)              !/ 1 + 1 = 2 !/
+print(`type is ${type|name|}`)          !/ type is string !/
+print(`pos: ${pos.x}, ${pos.y}`)        !/ pos: 1.0, 2.0 !/
+
+!/ regular strings still use + for concat !/
+print("hello " + name + "!")
+
+!/ longstring with interpolation !/
+msg : longstring = `
+    welcome to lzy
+    version ${version}
+    running as ${user}
+`
+
+
+!* ============================================================
+   18. nan and null
+   ============================================================ *!
+
+!/ NaN - not a number, first class literal !/
+!/ only valid in float context !/
+x : float = NaN
+y : float64 = NaN
+
+strict z : int = NaN    !/ pause or crash, NaN is not an int !/
+
+!/ NaN is infectious like null !/
+print(NaN + 1)          !/ NaN !/
+print(NaN * 100)        !/ NaN !/
+print(NaN == NaN)       !/ f - NaN is never equal to itself, same as IEEE 754 !/
+
+!/ null - absence of value !/
+thing = null
+print(thing)            !/ null !/
+
+!/ null is infectious !/
+print(null + 1)         !/ null !/
+print(null + "hi")      !/ null !/
+print(null * 100)       !/ null !/
+
+!/ checking for null !/
+if thing == null ~ {
+    print("nothing here")
+}
+
+
+!* ============================================================
+   19. linter hints
+   ============================================================ *!
+
+!*
+    hint levels:
+        optimize: -> style suggestion, always non-blocking
+        warn:     -> runtime warning, non-blocking in lenient
+        error:    -> blocking in strict mode, interpreter refuses to run
+*!
+
+!/ uppercase variable names (structs exempt) !/
+MyVariable = 5
+!/ linter: optimize - use myvariable or my_variable !/
+
+!/ string keys in dictionaries !/
+data = { ["name"] = "lzy" }
+!/ linter: optimize - remove quotes from key "name" !/
+
+!/ t and f in strict mode without the hack !/
+!/ linter: error - use true/false instead of t/f in strict mode !/
+
+!/ structs are exempt from uppercase hints !/
+struct Vector2 ~ {
+    x :: float
+    y :: float
+}
+
+
+!* ============================================================
+   20. watch (reactive variables)
+   ============================================================ *!
+
+!*
+    watch is a built-in observer
+    it listens to a variable and fires a block whenever the value changes
+    great for state machines, game logic, UI, anything event-driven
+
+    this is a language-level feature, not a library
+    the interpreter tracks watched variables and fires the block on change
+    the block runs AFTER the new value is assigned
+*!
+
+!/ basic usage !/
+hp = 100
+
+watch hp ~ {
+    print(`hp changed to ${hp}`)
+}
+
+hp = 80     !/ triggers: "hp changed to 80" !/
+hp = 0      !/ triggers: "hp changed to 0" !/
+
+!/ practical example - state machine with tinystring !/
+state : tinystring = "idle"
+
+watch state ~ {
+    if state == "dead" ~ {
+        print("player died")
+        stop        !/ stop the game loop !/
+    }
+    if state == "running" ~ {
+        playAnimation("run")
+    }
+}
+
+do hp > 0 ~ {
+    hp = hp - 10
+    if hp <= 0 ~ state = "dead"     !/ watch fires automatically !/
+}
+
+!/ watch multiple variables !/
+watch x, y ~ {
+    print(`position updated: ${x}, ${y}`)
+}
+
+!/ unwatch - stop observing !/
+unwatch hp
+unwatch x, y
+
+!/ watch with a condition - only fires if condition is true !/
+watch hp if hp < 20 ~ {
+    print("low health warning!")
+}
+
+!*
+    watch rules:
+        - fires AFTER the new value is assigned
+        - does not fire on initial assignment, only on change
+        - unwatch stops the observer
+        - watched variables in strict mode still enforce types
+        - watch blocks do NOT create new scope (like if/loop)
+        - multiple watches on the same variable all fire in definition order
+*!
+
+
+!* ============================================================
+   end of lzy reference v0.2
+
+   todo:
+       - float128 memory layout (experimental, float64 alias for now)
+       - safe + no debugger final decision
+       - full standard library
+       - textmate grammar for github/codeberg highlighting
+       - vs code extension
+============================================================ *!

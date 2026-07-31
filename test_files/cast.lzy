@@ -1,0 +1,11 @@
+x = 5
+print(<float64>x)        !/ 5.0 !/
+print(<string>x)         !/ "5" !/
+print(<bin>x)             !/ true !/
+print(<float64>x + 1)    !/ 6.0 - cast binds to x only !/
+print(<string><float64>x) !/ "5.0" !/
+
+x = 5
+y = <float64>x
+print(y === 5.0)    !/ true if the cast actually worked internally !/
+print(y === 5)      !/ should be false if y is truly float64 !/
