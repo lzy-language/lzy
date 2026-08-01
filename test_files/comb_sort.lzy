@@ -24,7 +24,6 @@ fn combSort(arr) ~ {
             i = i + 1
         }
         print(arr)
-        _sleep(0.5)
     }
 
     return arr
