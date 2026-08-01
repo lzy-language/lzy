@@ -46,7 +46,7 @@ strict name : string = "lzy"
 - **`~` block syntax** — `if x > 5 ~ { ... }`
 - **scope leaking** — variables defined inside `if`/`loop` blocks are visible outside
 - **built-in debug tools** — `_start`, `_end`, `_sleep`
-- ~~ **`io` module** — file and terminal i/o built in ~~ <sub>this isnt implemented in 0.1 yet</sub>
+- ~~**`io` module** — file and terminal i/o built in~~ <sub>this isnt implemented in 0.1 yet</sub>
 
 ---
 
