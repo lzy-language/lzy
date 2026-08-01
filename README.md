@@ -1,7 +1,7 @@
 <div align="center">
 
 ![lzy logo](https://raw.githubusercontent.com/lzy-language/lzy/refs/heads/main/src/repl_assets/logo.png)
-
+<sub>how do i do images dude</sub>
 # lzy
 **the laziest programming language ever**
 
