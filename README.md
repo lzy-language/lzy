@@ -93,7 +93,7 @@ do x < 10 ~ {
 }
 
 forever ~ {
-    input = io.read("> ")
+    input = io.read("> ") !/ doesnt work in 0.1 atm !/
     if input == "quit" ~ stop
     print(`you said: ${input}`)
 }
