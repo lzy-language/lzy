@@ -17,7 +17,7 @@
 
 ## what is lzy?
 
-lzy (pronounced *lazy*) is a dynamically typed, non-strict scripting language that prioritizes getting things done over enforcing rules. instead of crashing on type mismatches, lzy warns you and recovers. when you *do* want strictness, you opt in — surgically.
+lzy (pronounced *lazy*) is a dynamically typed, non-strict scripting language that prioritizes getting things done over enforcing rules. instead of crashing on type mismatches, lzy warns you and recovers. when you *do* want strictness, you opt in, surgically.
 
 ```r
 !/ hello world !/
@@ -172,3 +172,4 @@ src/
 licensed under [MPL 2.0](https://www.mozilla.org/en-US/MPL/2.0/)
 
 created by [gkugfk3](https://github.com/gkugfk3) with ♡
+> <sub>this markdown file was NOT written by generative ai</sub>
