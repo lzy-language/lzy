@@ -19,7 +19,7 @@
 
 lzy (pronounced *lazy*) is a dynamically typed, non-strict scripting language that prioritizes getting things done over enforcing rules. instead of crashing on type mismatches, lzy warns you and recovers. when you *do* want strictness, you opt in — surgically.
 
-```
+```r
 !/ hello world !/
 print("hello from lzy!")
 
@@ -52,7 +52,7 @@ strict name : string = "lzy"
 
 ## quick syntax
 
-```
+```r
 !/ this is a comment !/
 
 !*
@@ -126,14 +126,14 @@ score = "not available"     !/ safe variables can change type !/
 ## running lzy
 
 ```bash
-!/ start the repl !/
+# start the repl
 python lzy_run.py
 
-!/ run a file !/
+# run a file
 python lzy_run.py script.lzy
 python lzy_run.py -f script.lzy
 
-!/ for better performance !/
+# use pypy3!
 pypy3 lzy_run.py script.lzy
 ```
 
