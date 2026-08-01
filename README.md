@@ -1,6 +1,6 @@
 <div align="center">
 
-![lzy logo](https://raw.githubusercontent.com/gkugfk3/lzy/refs/heads/main/src/repl_assets/logo.png)
+![lzy logo](https://raw.githubusercontent.com/lzy-language/lzy/refs/heads/main/src/repl_assets/logo.png)
 
 # lzy
 **the laziest programming language ever**
