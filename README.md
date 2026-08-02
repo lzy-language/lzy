@@ -49,6 +49,22 @@ strict name : string = "lzy"
 
 ---
 
+## installation
+
+1. download the repo as zip or run
+`git clone https://github.com/lzy-language/lzy`
+2. install python or PyPy3 for better performance
+3. to run the repl, run
+```bash
+pypy3 src/lzy_run.py
+```
+or to run a file..
+```bash
+pypy3 src/lzy_run.py path/to/file.lzy
+```
+
+---
+
 ## quick syntax
 
 ```r
@@ -122,24 +138,6 @@ score = "not available"     !/ safe variables can change type !/
 
 ---
 
-## running lzy
-
-```bash
-# start the repl
-python lzy_run.py
-
-# run a file
-python lzy_run.py script.lzy
-python lzy_run.py -f script.lzy
-
-# use pypy3!
-pypy3 lzy_run.py script.lzy
-```
-
-> **tip:** running under [PyPy](https://pypy.org) gives ~20x speedup on loop-heavy code with zero code changes
-
----
-
 ## project structure
 
 ```
@@ -152,6 +150,10 @@ src/
   lzy_env.py      environment, symbol table, signals
   lzy_tokens.py   token types and keywords
   lzy_types.py    type inference, coercion, compatibility
+test_files/
+  ...             files created by the main dev or others to test functionality
+old/
+  0.0.3           older versions of lzy
 ```
 
 ---
