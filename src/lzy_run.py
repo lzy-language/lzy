@@ -226,8 +226,12 @@ def repl(env, evaluator):
             buffer = ""
 
         except KeyboardInterrupt:
-            print("\nexiting")
-            break
+            if buffer:
+                print("Cancel")
+                buffer =""
+            else:
+                print("")
+            continue
 
 
 if __name__ == "__main__":
