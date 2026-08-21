@@ -45,7 +45,7 @@ strict name : string = "lzy"
 - **`~` block syntax** — `if x > 5 ~ { ... }`
 - **scope leaking** — variables defined inside `if`/`loop` blocks are visible outside
 - **built-in debug tools** — `_start`, `_end`, `_sleep`
-- ~~**`io` module** — file and terminal i/o built in~~ <sub>this isnt implemented in 0.1 yet</sub>
+- **`io` module** — file and terminal i/o built in
 
 ---
 
@@ -108,7 +108,7 @@ do x < 10 ~ {
 }
 
 forever ~ {
-    input = io.read("> ") !/ doesnt work in 0.1 atm !/
+    input = io.read("> ")
     if input == "quit" ~ stop
     print(`you said: ${input}`)
 }
