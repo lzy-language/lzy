@@ -27,7 +27,7 @@ from lzy_ast import (
     LoopNode, ForeverNode, DoNode, StopNode, SkipNode,
     FunctionDefNode, FunctionCallNode, ReturnNode, IndexAssignNode,
     InterpStringNode, FieldAccessNode, MethodCallNode,
-    LazyDefNode, LazyCallNode,
+    LazyDefNode, LazyCallNode, MuteNode
 ) # the holy wall of imports
 from lzy_env import Environment, LzyModule, StrictError, StopSignal, SkipSignal, ReturnSignal
 from lzy_types import infer_type, coerce_value
@@ -169,6 +169,10 @@ class Evaluator:
                 print("[warn] _sleep: invalid duration, skipping")
                 return None
             time.sleep(float(duration))
+            return None
+            
+        if isinstance(node, MuteNode):
+            print("[_mute]: i dont know how to implement this yet")
             return None
             
         # blocks

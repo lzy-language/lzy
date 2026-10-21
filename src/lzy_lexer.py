@@ -193,6 +193,27 @@ class Lexer:
             elif ch == ".":
                 self.advance(); tokens.append(Token(TT.DOT, ".", pos))
 
+            # compound assignment (checked before the single-char arithmetic ops)
+            elif ch == "+" and self.peek(1) == "=":
+                self.advance(); self.advance()
+                tokens.append(Token(TT.PLUS_ASSIGN, "+=", pos))
+
+            elif ch == "-" and self.peek(1) == "=":
+                self.advance(); self.advance()
+                tokens.append(Token(TT.MINUS_ASSIGN, "-=", pos))
+
+            elif ch == "*" and self.peek(1) == "=":
+                self.advance(); self.advance()
+                tokens.append(Token(TT.STAR_ASSIGN, "*=", pos))
+
+            elif ch == "/" and self.peek(1) == "=":
+                self.advance(); self.advance()
+                tokens.append(Token(TT.SLASH_ASSIGN, "/=", pos))
+
+            elif ch == "%" and self.peek(1) == "=":
+                self.advance(); self.advance()
+                tokens.append(Token(TT.PERCENT_ASSIGN, "%=", pos))
+
             # single-char operators
             elif ch == "=":  self.advance(); tokens.append(Token(TT.ASSIGN,  "=",  pos))
             elif ch == "<":  self.advance(); tokens.append(Token(TT.LT,      "<",  pos))

@@ -74,6 +74,10 @@ def types_compatible(declared, actual, strict=False):
     if not strict and actual == "null":
         return True
 
+    # a null-typed variable can become anything in lenient mode
+    if not strict and d_fam == "null":
+        return True
+
     return False
 
 

@@ -42,6 +42,13 @@ class TT:
     COLON       = "COLON"       # :   primitive type hint
     DCOLON      = "DCOLON"      # ::  struct type hint
 
+    # compound assignment
+    PLUS_ASSIGN    = "PLUS_ASSIGN"     # +=
+    MINUS_ASSIGN   = "MINUS_ASSIGN"    # -=
+    STAR_ASSIGN    = "STAR_ASSIGN"     # *=
+    SLASH_ASSIGN   = "SLASH_ASSIGN"    # /=
+    PERCENT_ASSIGN = "PERCENT_ASSIGN"  # %=
+
     # block syntax
     TILDE       = "TILDE"       # ~
     LBRACE      = "LBRACE"      # {

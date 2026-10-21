@@ -154,6 +154,10 @@ class SkipNode:
     # skip = continue
     pass
     
+class MuteNode:
+    # makes parser shut up about unidentified tokens
+    pass
+    
 # functions
 
 class FunctionDefNode:
@@ -244,6 +248,7 @@ STMT_NODES = (
     DoNode,
     StopNode,
     SkipNode,
+    MuteNode,
     TimerStartNode,
     NonstrictNode,
     TimerEndNode,

@@ -199,6 +199,12 @@ class Environment:
                 print(f"  -> keeping existing value: {var['value']!r}")
                 return var["value"]
 
+        # a null-typed variable adopts the new type instead of coercing to null
+        if var["type"] == "null" and new_type != "null":
+            var["type"]  = new_type
+            var["value"] = value
+            return value
+
         var["value"] = coerce_value(value, var["type"])
         return var["value"]
 

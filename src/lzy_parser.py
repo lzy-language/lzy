@@ -186,6 +186,11 @@ class Parser:
             if t1 in (TT.ASSIGN, TT.COLON, TT.DCOLON):
                 return self.parse_assignment()
 
+            # compound assignment: IDENTIFIER followed by +=, -=, *=, /=, %=
+            if t1 in (TT.PLUS_ASSIGN, TT.MINUS_ASSIGN, TT.STAR_ASSIGN,
+                      TT.SLASH_ASSIGN, TT.PERCENT_ASSIGN):
+                return self.parse_compound_assignment()
+
             # index assignment: IDENTIFIER[index] = expr
             if t1 == TT.LBRACKET:
                 checkpoint = self.pos
@@ -361,6 +366,23 @@ class Parser:
         self.expect(TT.ASSIGN)
         expr = self.parse_logical()
         return AssignNode(name, expr, type_hint=type_hint, strict=strict, safe=safe)
+
+    # compound assignment: x += expr  ->  x = x + expr, etc.
+    COMPOUND_OPS = {
+        TT.PLUS_ASSIGN:    "+",
+        TT.MINUS_ASSIGN:   "-",
+        TT.STAR_ASSIGN:    "*",
+        TT.SLASH_ASSIGN:   "/",
+        TT.PERCENT_ASSIGN: "%",
+    }
+
+    def parse_compound_assignment(self):
+        name = self.expect(TT.IDENTIFIER).value
+        op_token = self.advance()  # the +=, -=, etc token
+        op  = self.COMPOUND_OPS[op_token.type]
+        rhs = self.parse_logical()
+        expr = BinaryOpNode(VarNode(name), op, rhs)
+        return AssignNode(name, expr)
 
     # range or expression (used in loop iterable position)
 

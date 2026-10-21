@@ -1,0 +1,25 @@
+_mute
+_start
+tot :: int32 = 0
+print("test 1: null -> number")
+x = null
+print(x)
+x = 5
+print(x)
+if x == 5 ~ {
+  print("check seems to had passed")
+  print("test 2: number -> string (nonstrict)")
+  y = 14
+  print(y)
+  y = "fourteen"
+  print(y)
+  tot += 1
+  if y == "fourteen" ~ {
+    print("test 2 passed")
+    tot += 1
+  } else ~ { print("test 2 failed") }
+} else ~ {
+  print("test 1 failed")
+}
+if tot >= 2 ~ { print("all tests passed") } else ~ { print("one of the tests failed") }
+_end

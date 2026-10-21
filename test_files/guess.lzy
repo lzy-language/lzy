@@ -1,0 +1,30 @@
+!/ number guessing game !/
+!/ guess the number between 1 and 100 !/
+
+secret = 42
+guesses = 0
+won = false
+
+io.writeln("welcome to the lzy number guessing game!")
+io.writeln("guess a number between 1 and 100")
+io.writeln("")
+
+forever ~ {
+    input = io.read("your guess: ")
+    guess = <int>input
+
+    guesses = guesses + 1
+
+    if guess < secret ~ {
+        io.writeln("too low!")
+    } else if guess > secret ~ {
+        io.writeln("too high!")
+    } else ~ {
+        won = true
+        stop
+    }
+}
+
+io.writeln("")
+print(`you got it in ${guesses} guess${guesses == 1 ? "" : "es"}!`)
+print(`the number was ${secret}`)
